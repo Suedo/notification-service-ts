@@ -21,7 +21,7 @@ provider:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
   iamRoleStatements:
     - ${file(iam/SendMailIAM.yml):SendMailIAM}
-    - ${file(iam/MailQueueIAM.yml):MailQueueIAM}
+    # - ${file(iam/MailQueueIAM.yml):MailQueueIAM}
 
 functions:
   sendMail:
@@ -35,11 +35,17 @@ functions:
 resources:
   Resources:
     MailQueue: ${file(resources/MailQueue.yml):MailQueue}
+  Outputs:
+    MailQueueArn: ${file(resources/MailQueue.yml):Outputs.MailQueueArn}
+    MailQueueUrl: ${file(resources/MailQueue.yml):Outputs.MailQueueUrl}
 
 custom:
   mailQueue:
     name: MailQueue-${self:provider.stage}
     arn: !GetAtt MailQueue.Arn
+    # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-sqs-queues.html
+    # search for `Return Values`, will have info about Ref. We use this to get the URL for MailQueue
+    url: !Ref MailQueue
   webpack:
     webpackConfig: ./webpack.config.js
     includeModules: true
