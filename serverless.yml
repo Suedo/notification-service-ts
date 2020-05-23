@@ -4,11 +4,6 @@ service:
 #app: your-app-name
 #org: your-org-name
 
-custom:
-  webpack:
-    webpackConfig: ./webpack.config.js
-    includeModules: true
-
 # Add the serverless-webpack plugin
 plugins:
   - serverless-webpack
@@ -24,11 +19,27 @@ provider:
     minimumCompressionSize: 1024 # Enable gzip compression for responses > 1 KB
   environment:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+  iamRoleStatements:
+    - ${file(iam/SendMailIAM.yml):SendMailIAM}
+    - ${file(iam/MailQueueIAM.yml):MailQueueIAM}
 
 functions:
-  hello:
-    handler: src/handlers/handler.hello
+  sendMail:
+    handler: src/handlers/sendMail.handler
+    # trigger on sqs queue
     events:
-      - http:
-          method: get
-          path: hello
+      - sqs:
+          arn: ${self:custom.mailQueue.arn}
+          batchSize: 1 #max 10
+
+resources:
+  Resources:
+    MailQueue: ${file(resources/MailQueue.yml):MailQueue}
+
+custom:
+  mailQueue:
+    name: MailQueue-${self:provider.stage}
+    arn: !GetAtt MailQueue.Arn
+  webpack:
+    webpackConfig: ./webpack.config.js
+    includeModules: true
