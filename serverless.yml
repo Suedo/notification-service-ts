@@ -8,6 +8,7 @@ service:
 plugins:
   - serverless-webpack
   - serverless-pseudo-parameters
+  - serverless-dotenv-plugin # https://www.serverless.com/plugins/serverless-dotenv-plugin/
 
 provider:
   name: aws
@@ -19,6 +20,7 @@ provider:
     minimumCompressionSize: 1024 # Enable gzip compression for responses > 1 KB
   environment:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+    SOURCE_EMAIL: ${env:SOURCE_EMAIL}
   iamRoleStatements:
     - ${file(iam/SendMailIAM.yml):SendMailIAM}
     # - ${file(iam/MailQueueIAM.yml):MailQueueIAM}
@@ -49,3 +51,5 @@ custom:
   webpack:
     webpackConfig: ./webpack.config.js
     includeModules: true
+  dotenv:
+    logging: false

@@ -11,7 +11,7 @@ export const sendMail = async (event, _context) => {
   console.log("Record obtained: " + JSON.stringify(record));
 
   const params: SendEmailRequest = {
-    Source: "somjitnag192@gmail.com",
+    Source: process.env.SOURCE_EMAIL,
     Destination: {
       ToAddresses: [recipient],
     },
